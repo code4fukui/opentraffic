@@ -1,14 +1,29 @@
 import { CSV } from "https://js.sabae.cc/CSV.js";
 import { fetchDataAll } from "./fetchData.js";
+import { existsFile } from "./existsFile.js";
+
+export const getFilename = (sdt) => {
+  const ymd = sdt.substring(0, 8);
+  return "data/" + ymd + "/" + sdt + ".csv";
+};
 
 export const saveData = async (sdt) => {
   //const data = await fetchDataCCTV(dt);
   //const data = await fetchDataNormal(dt);
   const data = await fetchDataAll(sdt);
   if (data.length == 0) return false;
-  const ymd = sdt.substring(0, 8);
-  await Deno.mkdir("data/" + ymd, { recursive: true });
-  await Deno.writeTextFile("data/" + ymd + "/" + sdt + ".csv", CSV.stringify(data));
+  const fn = getFilename(sdt);
+  await Deno.mkdir(fn.substring(0, fn.lastIndexOf("/")), { recursive: true });
+  await Deno.writeTextFile(fn, CSV.stringify(data));
   return true;
 };
 
+export const existsData = async (sdt) => {
+  const fn = getFilename(sdt);
+  return await existsFile(fn);
+};
+
+export const loadData = async (sdt) => {
+  const fn = getFilename(sdt);
+  return await CSV.fetchJSON(fn);
+};

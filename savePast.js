@@ -1,23 +1,40 @@
 import { DateTime } from "https://js.sabae.cc/DateTime.js";
-import { saveData } from "./saveData.js";
+import { saveData, existsData } from "./saveData.js";
 import { sleep } from "https://js.sabae.cc/sleep.js";
 
-// 20min
-const start = new DateTime("202505120000");
-const end = new DateTime("202505220000");
-console.log(start);
 const min5 = 5 * 60 * 1000;
+
+const getPast = (min) => {
+  const d = min * 60 * 1000;
+  const t = Math.floor((new Date().getTime() - d) / min5) * min5;
+  const dt = new DateTime(t);
+  return dt;
+};
+const getLatest = () => {
+  return getPast(25);
+};
+
+//const start = new DateTime("202505120000");
+const start = getPast(24 * 60); // 1day
+//const end = new DateTime("202505220000");
+const end = getLatest();
+console.log(start);
 const dt = min5;
 let ndata = 0;
 //for (let d = start; d.getTime() < end.getTime(); d = new DateTime(d.getTime() + dt)) {
 for (let d = end; d.getTime() >= start.getTime(); d = new DateTime(d.getTime() - dt)) {
   const sdt = d.toStringMinLog();
+  if (await existsData(sdt)) {
+    console.log(sdt, "skip");
+    continue;
+  }
   console.log(sdt);
   ndata++;
   await saveData(sdt);
   await sleep(300);
 }
 console.log(ndata);
+
 /*
 const d = 25 * 60 * 1000;
 const t = Math.floor((new Date().getTime() - d) / min5) * min5;
