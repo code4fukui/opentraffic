@@ -1,4 +1,4 @@
-import { DateTime } from "https://js.sabae.cc/DateTime.js";
+import { DateTime, TimeZone } from "https://js.sabae.cc/DateTime.js";
 import { saveData, existsData } from "./saveData.js";
 import { sleep } from "https://js.sabae.cc/sleep.js";
 
@@ -23,7 +23,7 @@ const dt = min5;
 let ndata = 0;
 //for (let d = start; d.getTime() < end.getTime(); d = new DateTime(d.getTime() + dt)) {
 for (let d = end; d.getTime() >= start.getTime(); d = new DateTime(d.getTime() - dt)) {
-  const sdt = d.toStringMinLog();
+  const sdt = d.toLocal(TimeZone.JST).toStringMinLog();
   if (await existsData(sdt)) {
     console.log(sdt, "skip");
     continue;
@@ -31,7 +31,7 @@ for (let d = end; d.getTime() >= start.getTime(); d = new DateTime(d.getTime() -
   console.log(sdt);
   ndata++;
   await saveData(sdt);
-  await sleep(300);
+  await sleep(150);
 }
 console.log(ndata);
 
