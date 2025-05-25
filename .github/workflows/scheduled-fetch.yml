@@ -17,6 +17,7 @@ jobs:
       - name: fetch
         run: |
           deno -A savePast.js
+          deno -A makeDataSummary.js
       - name: commit and push
         run: |
           git config --global user.email "workflow@example.com"
