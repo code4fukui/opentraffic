@@ -18,7 +18,7 @@ export const fetchDataCCTV = async (dt) => {
 export const fetchDataAll = async (dt) => {
   const data1 = await fetchDataNormal(dt);
   const data2 = await fetchDataCCTV(dt);
-  data2.forEach(i => i.color = "blue");
+  //data2.forEach(i => i.color = "blue");
   const data = [...data1, ...data2];
   return data;
 };
@@ -38,11 +38,15 @@ const fetchData = async (type, dt) => { // dt: DateTime or YYMMDDhhmm
   // delete （集計値）
   for (let i = 0; i < csv[0].length; i++) {
     csv[0][i] = csv[0][i].replace("（集計値）", "");
+    csv[0][i] = csv[0][i].replace("小型大型判別不能交通量", "車種判別不能交通量");
   }
   const data = CSV.toJSON(csv);
-  console.log(data);
+  //console.log(data);
   data.forEach(i => {
+    delete i.FID;
     const ll = parseGeometry(i.ジオメトリ);
+    delete i["上り・自動車交通量"];
+    delete i["下り・自動車交通量"];
     delete i.ジオメトリ;
     if (ll.length > 2) throw new Error("not supported geometry: " + i.ジオメトリ);
     i.lat = ll[0][1];

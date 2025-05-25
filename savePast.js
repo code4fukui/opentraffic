@@ -1,5 +1,5 @@
 import { DateTime, TimeZone } from "https://js.sabae.cc/DateTime.js";
-import { saveData, existsData } from "./saveData.js";
+import { fetchAndSaveData, existsData } from "./saveData.js";
 import { sleep } from "https://js.sabae.cc/sleep.js";
 
 const min5 = 5 * 60 * 1000;
@@ -30,7 +30,7 @@ for (let d = end; d.getTime() >= start.getTime(); d = new DateTime(d.getTime() -
   }
   console.log(sdt);
   ndata++;
-  await saveData(sdt);
+  await fetchAndSaveData(sdt);
   await sleep(150);
 }
 console.log(ndata);

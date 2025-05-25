@@ -7,17 +7,6 @@ export const getFilename = (sdt) => {
   return "data/" + ymd + "/" + sdt + ".csv";
 };
 
-export const saveData = async (sdt) => {
-  //const data = await fetchDataCCTV(dt);
-  //const data = await fetchDataNormal(dt);
-  const data = await fetchDataAll(sdt);
-  if (data.length == 0) return false;
-  const fn = getFilename(sdt);
-  await Deno.mkdir(fn.substring(0, fn.lastIndexOf("/")), { recursive: true });
-  await Deno.writeTextFile(fn, CSV.stringify(data));
-  return true;
-};
-
 export const existsData = async (sdt) => {
   const fn = getFilename(sdt);
   return await existsFile(fn);
@@ -26,4 +15,19 @@ export const existsData = async (sdt) => {
 export const loadData = async (sdt) => {
   const fn = getFilename(sdt);
   return await CSV.fetchJSON(fn);
+};
+
+export const saveData = async (sdt, data) => {
+  const fn = getFilename(sdt);
+  await Deno.mkdir(fn.substring(0, fn.lastIndexOf("/")), { recursive: true });
+  await Deno.writeTextFile(fn, CSV.stringify(data));
+  return true;
+};
+
+export const fetchAndSaveData = async (sdt) => {
+  //const data = await fetchDataCCTV(dt);
+  //const data = await fetchDataNormal(dt);
+  const data = await fetchDataAll(sdt);
+  if (data.length == 0) return false;
+  return await saveData(sdt, data);
 };
