@@ -1,0 +1,65 @@
+import { DateTime, TimeZone } from "https://js.sabae.cc/DateTime.js";
+import { loadData, existsData } from "./saveData.js";
+import { CSV } from "https://js.sabae.cc/CSV.js";
+
+const min5 = 5 * 60 * 1000;
+
+const start = new DateTime("20250524");
+const end = new DateTime("20250525");
+const dt = min5;
+
+const id = "常時観測点コード";
+
+const itemstay = [
+  "地方整備局等番号", "開発建設部／都道府県コード", "常時観測点コード", "収集時間フラグ（5分間／1時間）", "観測年月日", "時間帯",
+  "カメラプリセット位置",
+  "道路種別", "時間コード", "lat", "lng", "lng2", "lat2",
+  "count",
+];
+const sensors = [];
+for (let d = start; d.getTime() < end.getTime(); d = new DateTime(d.getTime() + dt)) {
+  const sdt = d.toLocal(TimeZone.JST).toStringMinLog();
+  if (!await existsData(sdt)) {
+    console.log(sdt, "skip");
+    continue;
+  }
+
+  const data = await loadData(sdt);
+
+  data.forEach(i => {
+    const d = sensors.find(j => j[id] == i[id]);
+    if (!d) {
+      for (const name in i) {
+        if (itemstay.indexOf(name) >= 0) continue;
+        if (i[name] != "") {
+          i[name] = parseInt(i[name]);
+        }
+      }
+      i.count = 1;
+      sensors.push(i);
+    } else {
+      d.count++;
+      for (const name in i) {
+        if (itemstay.indexOf(name) >= 0) continue;
+        if (i[name] != "") {
+          if (d[name] == "") {
+            d[name] = parseInt(i[name]);
+          } else {
+            d[name] += parseInt(i[name]);
+          }
+        }
+      }
+    }
+  });
+}
+
+const p = (n) => n === "" ? 0 : n;
+for (const i of sensors) {
+  i.color = i["カメラプリセット位置"] !== "" ? "blue" : "red";
+  i["上り・交通量"] = p(i["上り・小型交通量"]) + p(i["上り・大型交通量"]) + p(i["上り・車種判別不能交通量"]);
+  i["下り・交通量"] = p(i["下り・小型交通量"]) + p(i["下り・大型交通量"]) + p(i["下り・車種判別不能交通量"]);
+  i["交通量"] = i["上り・交通量"] + i["下り・交通量"];
+  delete i["時間帯"];
+  delete i["時間コード"];
+}
+await Deno.writeTextFile("data_processed/sensors.csv", CSV.stringify(sensors));
