@@ -70,7 +70,7 @@ export const makeDataSummary = async (sdate) => {
   await Deno.writeTextFile("data_processed/" + sdate + ".csv", CSV.stringify(sensors));
 };
 
-const today = new Day();
+const today = new DateTime().toLocal(TimeZone.JST).day;
 const startday = new Day("20250512");
 for (let d = today.prevDay(); d.isAfter(startday) || d.equals(startday); d = d.prevDay()) {
   const sdate = d.toStringYMD();
